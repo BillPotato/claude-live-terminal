@@ -1,0 +1,12 @@
+{
+  "name": "claude-live-terminal-market",
+  "owner": { "name": "Bill" },
+  "description": "Local marketplace hosting the Claude Live Terminal plugin.",
+  "plugins": [
+    {
+      "name": "claude-live-terminal",
+      "source": "./plugin",
+      "description": "Streams Bash/PowerShell tool output live into VS Code integrated terminals (workaround for issue #14280)"
+    }
+  ]
+}
