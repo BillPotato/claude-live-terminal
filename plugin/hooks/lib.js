@@ -29,6 +29,17 @@ function exitPath(id) {
   return filePath('cmd-' + id + '.exit');
 }
 
+function scriptPath(id, ext) {
+  return filePath('cmd-' + id + '.' + ext);
+}
+
+// Write a shell script for the wrapper to invoke. PowerShell 5.1 decodes a
+// BOM-less file using the system codepage, which corrupts non-ASCII, so we
+// prepend a UTF-8 BOM.
+function writeScript(p, content, withBom) {
+  fs.writeFileSync(p, (withBom ? '﻿' : '') + content, 'utf8');
+}
+
 // Atomic write (tmp + rename) so the extension's watcher never reads a
 // half-written meta file.
 function writeMeta(id, meta) {
@@ -49,4 +60,4 @@ function readStdinJson() {
   }
 }
 
-module.exports = { LIVE_DIR, ensureDir, isDisabled, genId, filePath, logPath, exitPath, writeMeta, readStdinJson };
+module.exports = { LIVE_DIR, ensureDir, isDisabled, genId, filePath, logPath, exitPath, scriptPath, writeScript, writeMeta, readStdinJson };

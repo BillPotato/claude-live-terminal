@@ -34,17 +34,23 @@ function buildBash(command, log, exit) {
   );
 }
 
-// Out-String -Stream flattens ErrorRecords (PS 5.1 wraps native stderr in
-// them under 2>&1) into plain lines for both Claude and the log. LASTEXITCODE
-// is reset first so a cmdlet-only command doesn't report a stale code.
-function buildPowerShell(command, log, exit) {
+// The original command is written to a .ps1 file and dot-sourced by path. This
+// matters for two reasons:
+//   1. Claude Code's PowerShell tool rejects `& { ... }` (script-block via the
+//      call operator) as a "dynamic expression"; invoking a script *by path*
+//      passes the validator.
+//   2. Dot-sourcing (`.`) runs the script in the caller's scope, so Set-Location
+//      and other state persist across tool calls, matching un-wrapped behavior.
+// Out-String -Stream flattens ErrorRecords (PS 5.1 wraps native stderr in them
+// under 2>&1) into plain lines; Tee-Object streams them live to the log.
+function buildPowerShell(scriptFile, log, exit) {
+  const S = psQuotedPath(scriptFile);
   const L = psQuotedPath(log);
   const E = psQuotedPath(exit);
   return (
-    '$global:LASTEXITCODE = 0\n' +
-    '& {\n' + command + '\n} 2>&1 | Out-String -Stream | Tee-Object -FilePath ' + L + ' -Append\n' +
+    '. ' + S + ' 2>&1 | Out-String -Stream | Tee-Object -FilePath ' + L + ' -Append\n' +
     '$' + SENTINEL + ' = $LASTEXITCODE; if ($null -eq $' + SENTINEL + ') { $' + SENTINEL + ' = 0 }\n' +
-    'Set-Content -Path ' + E + ' -Value $' + SENTINEL + ' -Encoding Ascii\n' +
+    'Set-Content -LiteralPath ' + E + ' -Value $' + SENTINEL + ' -Encoding Ascii\n' +
     '$global:LASTEXITCODE = $' + SENTINEL
   );
 }
@@ -64,9 +70,14 @@ function main() {
   const log = lib.logPath(id);
   const exit = lib.exitPath(id);
 
-  const wrapped = tool === 'PowerShell'
-    ? buildPowerShell(command, log, exit)
-    : buildBash(command, log, exit);
+  let wrapped;
+  if (tool === 'PowerShell') {
+    const scriptFile = lib.scriptPath(id, 'ps1');
+    lib.writeScript(scriptFile, command, true); // UTF-8 BOM for PS 5.1
+    wrapped = buildPowerShell(scriptFile, log, exit);
+  } else {
+    wrapped = buildBash(command, log, exit);
+  }
 
   lib.writeMeta(id, {
     id,
