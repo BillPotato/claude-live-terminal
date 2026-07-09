@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Compiled extension output
+vscode-extension/out/
+
+# Packaged extension
+*.vsix
+
+# Temp / scratch
+*.tmp
