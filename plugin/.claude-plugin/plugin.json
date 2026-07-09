@@ -3,7 +3,5 @@
   "displayName": "Claude Live Terminal",
   "description": "Streams Bash/PowerShell tool output live into VS Code integrated terminals (workaround for issue #14280)",
   "version": "0.1.0",
-  "author": { "name": "Bill" },
-  "hooks": "./hooks/hooks.json",
-  "skills": "./skills/"
+  "author": { "name": "Bill" }
 }
