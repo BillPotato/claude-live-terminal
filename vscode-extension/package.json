@@ -1,0 +1,37 @@
+{
+  "name": "claude-live-terminal",
+  "displayName": "Claude Live Terminal",
+  "description": "Renders Claude Code shell command output live in VS Code integrated terminals",
+  "version": "0.1.0",
+  "publisher": "claude-live-terminal",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "claudeLiveTerminal.showTerminals",
+        "title": "Claude Live Terminal: Show Terminals"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "npx --yes @vscode/vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0"
+  }
+}
