@@ -39,7 +39,11 @@ function writeMeta(id, meta) {
 
 function readStdinJson() {
   try {
-    return JSON.parse(fs.readFileSync(0, 'utf8'));
+    let raw = fs.readFileSync(0, 'utf8');
+    if (raw.charCodeAt(0) === 0xfeff) {
+      raw = raw.slice(1); // strip UTF-8 BOM (some shells prepend one)
+    }
+    return JSON.parse(raw);
   } catch (e) {
     return null;
   }
